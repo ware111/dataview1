@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>数据可视化</title>
+    <link href="/css/view.css" type="text/css" rel="stylesheet">
+    <script src="/js/echarts.min.js"></script>
+     <script src="/js/jquery-1.11.2.min.js"></script>
+</head>
+<body>
+<div class="section-one" id="div1">
+    <div class="img-section">
+        <img src="/img/清华大学1.jpg">
+    </div>
+    <div class="time-section">
+        <ul  class="time-section-1">
+            <li style="float: left;margin-top: 10px;margin-left: 10px">
+                <div>
+                    <p id="date"></p>
+                    <p id="time"></p>
+                </div>
+            </li>
+            <li style="float: left;margin-left: 30px">
+                <div class="total-section">
+                    <p>教室总人数</p>
+                    <p class="count-people" style="font-size: 30px;margin-top: 0px"></p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="section-two" id="div2">
+    <ul class="section-two-ul">
+        <li class="section-two-ul-li1">
+            <div style="float: left">
+                <div style="background-color: blueviolet;width: 20px;height: 10px"></div>
+                <p>当前活跃教室</p>
+                <p id="nowClassRoom" style="font-size: 30px"></p>
+            </div>
+
+            <div style="float: left;margin-left: 30%">
+                <div style="float: left">
+                    <div style="background-color: blueviolet;width: 20px;height: 10px"></div>
+                    <p>当前授课教师</p>
+                    <p id="nowTeacher" style="font-size: 30px"></p>
+                </div>
+            </div>
+            <div style="float: left;margin-left: 30%">
+                <div style="float: left">
+                    <div style="background-color: blueviolet;width: 20px;height: 10px"></div>
+                    <p>当前上课学生数</p>
+                    <p id="nowStudent" style="font-size: 30px"></p>
+                </div>
+            </div>
+        </li>
+        <li class="section-two-ul-li2">
+            <div style="float: left">
+                <div style="float: left">
+                    <div style="background-color: blueviolet;width: 20px;height: 10px"></div>
+                    <p>当日活跃教室数</p>
+                    <p id="dayClassRoom" style="font-size: 30px"></p>
+                </div>
+            </div>
+            <div style="float: left;margin-left: 30%">
+                <div style="float: left">
+                    <div style="background-color: blueviolet;width: 20px;height: 10px"></div>
+                    <p>当日授课教师数</p>
+                    <p id="dayTeacher" style="font-size: 30px"></p>
+                </div>
+            </div>
+            <div style="float: left;margin-left: 30%">
+                <div style="float: left">
+                    <div style="background-color: blueviolet;width: 20px;height: 10px"></div>
+                    <p>当日上课学生数</p>
+                    <p id="dayStudent" style="font-size: 30px"></p>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+<div class="section-middle" id="section-middle">
+    <p style="float: left" id="data24">最近24小时数据</p>
+    <p style="float: left;margin-left: 30px" id="data30">最近30天数据</p>
+</div>
+<div  class="section-three" id="section-three"/>
+<!--<div  class="section-four" id="section-four"/>-->
+<script src="/js/vies.js"></script>
+<script type="text/javascript">
+
+
+    //当前在线教室数函数
+    function nowClassRoomFunction(){
+        var socketUrl="http://localhost:8010/nowClassRoom";
+        socketUrl=socketUrl.replace("https","ws").replace("http","ws");
+        if ('WebSocket' in window)
+            websocket = new WebSocket(socketUrl);
+        else if ('MozWebSocket' in window)
+            websocket = new MozWebSocket(socketUrl);
+        else {
+            alert('当前浏览器 Not support websocket')
+        }
+        //连接发生错误的回调方法
+        websocket.onerror = function () {
+            setMessageInnerHTML("WebSocket连接发生错误");
+        };
+        //连接成功建立的回调方法
+        websocket.onopen = function (event) {
+            console.debug("WebSocket连接成功");
+        }
+        //接收到消息的回调方法
+        websocket.onmessage = function (event) {
+
+            setMessageInnerHTML(event.data);
+
+        }
+
+        //连接关闭的回调方法
+        websocket.onclose = function () {
+            console.debug("WebSocket关闭成功");
+        }
+
+        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+        window.onbeforeunload = function () {
+            closeWebSocket();
+        }
+
+        //将消息显示在网页上
+        function setMessageInnerHTML(innerHTML) {
+            document.getElementById('nowClassRoom').innerHTML = innerHTML + '<br/>';
+        }
+
+        //关闭WebSocket连接
+        function closeWebSocket() {
+            websocket.close();
+        }
+        function sendMsg() {
+            websocket.send("This is a client message ");
+        }
+    }
+    //当前在线学生数函数
+    function nowStudentFunction(){
+        var socketUrl="http://localhost:8010/nowStudent";
+        socketUrl=socketUrl.replace("https","ws").replace("http","ws");
+        if ('WebSocket' in window)
+            websocket = new WebSocket(socketUrl);
+        else if ('MozWebSocket' in window)
+            websocket = new MozWebSocket(socketUrl);
+        else {
+            alert('当前浏览器 Not support websocket')
+        }
+        //连接发生错误的回调方法
+        websocket.onerror = function () {
+            setMessageInnerHTML("WebSocket连接发生错误");
+        };
+        //连接成功建立的回调方法
+        websocket.onopen = function (event) {
+            console.debug("WebSocket连接成功");
+        }
+        //接收到消息的回调方法
+        websocket.onmessage = function (event) {
+
+            setMessageInnerHTML(event.data);
+
+        }
+
+        //连接关闭的回调方法
+        websocket.onclose = function () {
+            console.debug("WebSocket关闭成功");
+        }
+
+        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+        window.onbeforeunload = function () {
+            closeWebSocket();
+        }
+
+        //将消息显示在网页上
+        function setMessageInnerHTML(innerHTML) {
+            document.getElementById('nowStudent').innerHTML = innerHTML + '<br/>';
+        }
+
+        //关闭WebSocket连接
+        function closeWebSocket() {
+            websocket.close();
+        }
+        function sendMsg() {
+            websocket.send("This is a client message ");
+        }
+    }
+    //当前在线老师数函数
+    function nowTeacherFun(){
+        var nowTeacherUrl="http://localhost:8010/nowTeacher";
+        nowTeacherUrl=nowTeacherUrl.replace("https","ws").replace("http","ws");
+        if ('WebSocket' in window)
+            hour10ClassRoomSocket = new WebSocket(nowTeacherUrl);
+        else if ('MozWebSocket' in window)
+            hour10ClassRoomSocket = new MozWebSocket(nowTeacherUrl);
+        else {
+            alert('当前浏览器 Not support websocket')
+        }
+        //连接发生错误的回调方法
+        hour10ClassRoomSocket.onerror = function () {
+            nowTeacherSetMessageInnerHTML("WebSocket连接发生错误");
+        };
+        //连接成功建立的回调方法
+        hour10ClassRoomSocket.onopen = function (event) {
+            console.debug("WebSocket连接成功");
+        }
+        //接收到消息的回调方法
+        hour10ClassRoomSocket.onmessage = function (event) {
+            nowTeacherSetMessageInnerHTML(event.data);
+        }
+
+        //连接关闭的回调方法
+        hour10ClassRoomSocket.onclose = function () {
+            console.debug("WebSocket关闭成功");
+        }
+
+        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+        window.onbeforeunload = function () {
+            closeWebSocket();
+        }
+
+        //将消息显示在网页上
+        function nowTeacherSetMessageInnerHTML(innerHTML) {
+            document.getElementById('nowTeacher').innerHTML = innerHTML + '<br/>';
+        }
+
+        //关闭WebSocket连接
+        function closeWebSocket() {
+            hour10ClassRoomSocket.close();
+        }
+        function sendMsg() {
+            hour10ClassRoomSocket.send("This is a client message ");
+        }
+    }
+    //当日在线教室数函数
+    function dayClassRoomFunction(){
+        var socketUrl="http://localhost:8010/dayClassRoom";
+        socketUrl=socketUrl.replace("https","ws").replace("http","ws");
+        if ('WebSocket' in window)
+            websocket = new WebSocket(socketUrl);
+        else if ('MozWebSocket' in window)
+            websocket = new MozWebSocket(socketUrl);
+        else {
+            alert('当前浏览器 Not support websocket')
+        }
+        //连接发生错误的回调方法
+        websocket.onerror = function () {
+            setMessageInnerHTML("WebSocket连接发生错误");
+        };
+        //连接成功建立的回调方法
+        websocket.onopen = function (event) {
+            console.debug("WebSocket连接成功");
+        }
+        //接收到消息的回调方法
+        websocket.onmessage = function (event) {
+
+            setMessageInnerHTML(event.data);
+
+        }
+
+        //连接关闭的回调方法
+        websocket.onclose = function () {
+            console.debug("WebSocket关闭成功");
+        }
+
+        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+        window.onbeforeunload = function () {
+            closeWebSocket();
+        }
+
+        //将消息显示在网页上
+        function setMessageInnerHTML(innerHTML) {
+            document.getElementById('dayClassRoom').innerHTML = innerHTML + '<br/>';
+        }
+
+        //关闭WebSocket连接
+        function closeWebSocket() {
+            websocket.close();
+        }
+        function sendMsg() {
+            websocket.send("This is a client message ");
+        }
+    }
+    //当日在线教师数函数
+    function dayTeacherFunction(){
+        var socketUrl="http://localhost:8010/dayTeacher";
+        socketUrl=socketUrl.replace("https","ws").replace("http","ws");
+        if ('WebSocket' in window)
+            websocket = new WebSocket(socketUrl);
+        else if ('MozWebSocket' in window)
+            websocket = new MozWebSocket(socketUrl);
+        else {
+            alert('当前浏览器 Not support websocket')
+        }
+        //连接发生错误的回调方法
+        websocket.onerror = function () {
+            setMessageInnerHTML("WebSocket连接发生错误");
+        };
+        //连接成功建立的回调方法
+        websocket.onopen = function (event) {
+            console.debug("WebSocket连接成功");
+        }
+        //接收到消息的回调方法
+        websocket.onmessage = function (event) {
+
+            setMessageInnerHTML(event.data);
+
+        }
+
+        //连接关闭的回调方法
+        websocket.onclose = function () {
+            console.debug("WebSocket关闭成功");
+        }
+
+        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+        window.onbeforeunload = function () {
+            closeWebSocket();
+        }
+
+        //将消息显示在网页上
+        function setMessageInnerHTML(innerHTML) {
+            document.getElementById('dayTeacher').innerHTML = innerHTML + '<br/>';
+        }
+
+        //关闭WebSocket连接
+        function closeWebSocket() {
+            websocket.close();
+        }
+        function sendMsg() {
+            websocket.send("This is a client message ");
+        }
+    }
+    //当日在线学生数函数
+    function dayStudentFunction(){
+        var socketUrl="http://localhost:8010/dayStudent";
+        socketUrl=socketUrl.replace("https","ws").replace("http","ws");
+        if ('WebSocket' in window)
+            websocket = new WebSocket(socketUrl);
+        else if ('MozWebSocket' in window)
+            websocket = new MozWebSocket(socketUrl);
+        else {
+            alert('当前浏览器 Not support websocket')
+        }
+        //连接发生错误的回调方法
+        websocket.onerror = function () {
+            setMessageInnerHTML("WebSocket连接发生错误");
+        };
+        //连接成功建立的回调方法
+        websocket.onopen = function (event) {
+            console.debug("WebSocket连接成功");
+        }
+        //接收到消息的回调方法
+        websocket.onmessage = function (event) {
+
+            setMessageInnerHTML(event.data);
+
+        }
+
+        //连接关闭的回调方法
+        websocket.onclose = function () {
+            console.debug("WebSocket关闭成功");
+        }
+
+        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+        window.onbeforeunload = function () {
+            closeWebSocket();
+        }
+
+        //将消息显示在网页上
+        function setMessageInnerHTML(innerHTML) {
+            document.getElementById('dayStudent').innerHTML = innerHTML + '<br/>';
+        }
+
+        //关闭WebSocket连接
+        function closeWebSocket() {
+            websocket.close();
+        }
+        function sendMsg() {
+            websocket.send("This is a client message ");
+        }
+    }
+
+
+    $(function(){
+        nowClassRoomFunction();
+        nowTeacherFun();
+        nowStudentFunction();
+        dayClassRoomFunction();
+        dayTeacherFunction();
+        dayStudentFunction();
+    })
+
+
+
+    window.onload = setInterval(function (args) {
+
+        var month = new Date().getMonth();
+        var day = new Date().getDay();
+        var hour = new Date().getHours();
+        var minute = new Date().getMinutes();
+        var second = new Date().getSeconds();
+
+        if (month<10){
+            month="0"+month;
+        }
+
+        if (day < 10){
+            day = "0"+day;
+        }
+
+        if (hour < 10){
+            hour = "0"+hour;
+        }
+
+        if (minute < 10){
+            minute = "0"+minute;
+        }
+
+        if (second < 10){
+            second = "0"+second;
+        }
+
+        var student = new Number($('#nowStudent').text());
+        var teacher = new Number($('#nowTeacher').text());
+
+
+        $('#date').html(new Date().getFullYear()+"-"+month+"-"+day);
+        $('#time').html(hour+":"+minute+":"+second);
+        $('.count-people').html(student+teacher);
+    }, 1000)
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
